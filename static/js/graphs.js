@@ -65,91 +65,105 @@ drawlinechart();
 
 function drawlinechart(){
     console.log("Drawing Line Chart")
-    var svg = d3.select("svg"),
-    margin = {top: 20, right: 80, bottom: 30, left: 50},
-    width = svg.attr("width") - margin.left - margin.right,
-    height = svg.attr("height") - margin.top - margin.bottom,
-    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var margin = {top: 20, right: 20, bottom: 30, left: 150},
+    width = 1500 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
-var parseTime = d3.timeParse("%Y%m%d");
+    var linedata = [];
 
-var x = d3.scaleTime().range([0, width]),
-    y = d3.scaleLinear().range([height, 0]),
-    z = d3.scaleOrdinal(d3.schemeCategory10);
+    var color = d3.scale.ordinal()
+        .range(["#0a0", "yellow", "blue", "red"]);
 
-var line = d3.line()
-    .curve(d3.curveBasis)
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.temperature); });
+    var x = d3.scale.ordinal()
+            .rangePoints([0, 1500]);
 
-d3.json("/h1b/alldata", function(error, data) {
-  if (error) throw error;
+        var y = d3.scale.linear()
+            .range([height, 0]);
 
-  data.forEach(function(d) {
-            linedata[d.id] = ({"State":d.employer_state,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});
+
+        var xAxis = d3.svg.axis().scale(x).orient("bottom");
+        var yAxis = d3.svg.axis().scale(y).orient("left");
+   
+   var divTooltip = d3.select("body").append("div").attr("class", "toolTip");
+
+    var svg = d3.select("#line-chart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    
+    d3.json("/h1b/alldata", function(error, data) {
+        if (error) throw error;
+
+        data.forEach(function(d) {
+            linedata[d.id] = ({"State":d.employer_state,"CERTIFIED":d.certified, "WITHDRAWN": d.withdrawn, "CERTIFIEDWITHDRAWN": d.certifiedwithdrawn, "DENIED":d.denied});
         });
+     //   console.log(linedata);
+        var seriesNames = d3.keys(linedata[1])
+            .filter(function(d) { return d !== "State"; })
+            .sort();
+  
+        var series = seriesNames.map(function(series) {
+            return linedata.map(function(d) {
+                if(d){
+            return {State: d.State, values: +d[series]};}
+        });
+   });
+        
+  //      console.log(seriesNames);
+  //  console.log(series);
+       x.domain(linedata.map(function(d) { 
+        return d.State; }));
+       y.domain([0,10000]);
 
-  var cities = linedata.columns.slice(1).map(function(id) {
-    return {
-      id: id,
-      values: data.map(function(d) {
-        return {date: d.date, temperature: d[id]};
-      })
-    };
-  });
-
-  console.log(cities);
-/*
-  x.domain(d3.extent(data, function(d) { return d.date; }));
-
-  y.domain([
-    d3.min(cities, function(c) { return d3.min(c.values, function(d) { return d.temperature; }); }),
-    d3.max(cities, function(c) { return d3.max(c.values, function(d) { return d.temperature; }); })
-  ]);
-
-  z.domain(cities.map(function(c) { return c.id; }));
-
-  g.append("g")
-      .attr("class", "axis axis--x")
+       svg.append("g")
+      .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+      .call(xAxis);
 
-  g.append("g")
-      .attr("class", "axis axis--y")
-      .call(d3.axisLeft(y))
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", "0.71em")
-      .attr("fill", "#000")
-      .text("Temperature, ºF");
+        svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(0,0)")
+      .call(yAxis);
 
-  var city = g.selectAll(".city")
-    .data(cities)
+      /*
+      svg.append("path")        
+        .datum(linedata)
+        .style("stroke", function(d, i) { return color(i); })
+        .attr("d", line);
+        */
+
+      svg.selectAll(".series")
+      .data(series)
     .enter().append("g")
-      .attr("class", "city");
-
-  city.append("path")
-      .attr("class", "line")
-      .attr("d", function(d) { return line(d.values); })
-      .style("stroke", function(d) { return z(d.id); });
-
-  city.append("text")
-      .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
-      .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
-      .attr("x", 3)
-      .attr("dy", "0.35em")
-      .style("font", "10px sans-serif")
-      .text(function(d) { return d.id; });
-      */
+      .attr("class", "series")
+      .style("fill", function(d, i) { return color(i); })
+    .selectAll(".point")
+      .data(function(d) { return d; })
+    .enter().append("circle")
+      .attr("class", "point")
+      .attr("r", 4.5)
+      .attr("cx", function(d) { 
+        if(d){
+        return x(d.State);
+        }})
+      .attr("cy", function(d) { 
+        if(d){
+        return y(d.values); }})
+       .on("mousemove", function(d){
+            if(d){
+            divTooltip.style("left", d3.event.pageX+10+"px");
+            divTooltip.style("top", d3.event.pageY-25+"px");
+            divTooltip.style("display", "inline-block");
+            var id = short_name_id_map[d.State];
+            divTooltip.html(statename[id]+" : "+d.values);
+        }
+        })
+        .on("mouseout", function(d){
+            divTooltip.style("display", "none");
+        });
 });
-
-function type(d, _, columns) {
-  d.date = parseTime(d.date);
-  for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
-  return d;
-}
-
 }
 
 

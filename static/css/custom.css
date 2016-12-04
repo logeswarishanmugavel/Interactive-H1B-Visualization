@@ -7,13 +7,13 @@
 .axis path,
 .axis line {
     fill: none;
-    stroke: steelblue;
+    stroke: grey;
     stroke-width: 1;
     shape-rendering: crispEdges;
 }
 
-.axis--x path {
-  display: none;
+.point {
+  stroke: #000;
 }
 
 .line {
@@ -103,8 +103,8 @@ font-size: 20px;
 
 #line-chart {
   position: absolute;
-  left: 900px;
-  top:750px;
+  left: 50px;
+  top:1400px;
 }
 
 

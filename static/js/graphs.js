@@ -1,5 +1,5 @@
 
-var SCALE = 1.7;
+var SCALE = 2;
 var state_ids = [ 0 ];
 var id_state_map = {
     1: ""
@@ -61,83 +61,101 @@ var state_link = {
 
 drawmap();
 drawgroupedbarchart();
+drawlinechart();
 
-//drawlinechart();
-/*
 function drawlinechart(){
-    var margin = {top: 30, right: 20, bottom: 30, left: 50},
-    width = 600 - margin.left - margin.right,
-    height = 270 - margin.top - margin.bottom;
+    console.log("Drawing Line Chart")
+    var svg = d3.select("svg"),
+    margin = {top: 20, right: 80, bottom: 30, left: 50},
+    width = svg.attr("width") - margin.left - margin.right,
+    height = svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-// Parse the date / time
-var parseDate = d3.time.format("%d-%b-%y").parse;
+var parseTime = d3.timeParse("%Y%m%d");
 
-// Set the ranges
-var x = d3.time.scale().range([0, width]);
-var y = d3.scale.linear().range([height, 0]);
+var x = d3.scaleTime().range([0, width]),
+    y = d3.scaleLinear().range([height, 0]),
+    z = d3.scaleOrdinal(d3.schemeCategory10);
 
-// Define the axes
-var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(5);
-
-var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(5);
-
-// Define the line
-var valueline = d3.svg.line()
+var line = d3.line()
+    .curve(d3.curveBasis)
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });
-    
-// Adds the svg canvas
-var svg = d3.select("#line-chart")
-    .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-        .attr("transform", 
-              "translate(" + margin.left + "," + margin.top + ")");
+    .y(function(d) { return y(d.temperature); });
 
-// Get the data
-d3.csv("./static/data/data.csv", function(error, data) {
-    data.forEach(function(d) {
-        d.date = parseDate(d.date);
-        d.close = +d.close;
-    });
+d3.json("/h1b/alldata", function(error, data) {
+  if (error) throw error;
 
-    // Scale the range of the data
-    x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return d.close; })]);
+  data.forEach(function(d) {
+            linedata[d.id] = ({"State":d.employer_state,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});
+        });
 
-    // Add the valueline path.
-    svg.append("path")
-        .attr("class", "line")
-        .attr("d", valueline(data));
+  var cities = linedata.columns.slice(1).map(function(id) {
+    return {
+      id: id,
+      values: data.map(function(d) {
+        return {date: d.date, temperature: d[id]};
+      })
+    };
+  });
 
-    // Add the scatterplot
-    svg.selectAll("dot")
-        .data(data)
-      .enter().append("circle")
-        .attr("r", 3.5)
-        .attr("cx", function(d) { return x(d.date); })
-        .attr("cy", function(d) { return y(d.close); });
+  console.log(cities);
+/*
+  x.domain(d3.extent(data, function(d) { return d.date; }));
 
-    // Add the X Axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+  y.domain([
+    d3.min(cities, function(c) { return d3.min(c.values, function(d) { return d.temperature; }); }),
+    d3.max(cities, function(c) { return d3.max(c.values, function(d) { return d.temperature; }); })
+  ]);
 
-    // Add the Y Axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
+  z.domain(cities.map(function(c) { return c.id; }));
 
+  g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  g.append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(y))
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("fill", "#000")
+      .text("Temperature, ºF");
+
+  var city = g.selectAll(".city")
+    .data(cities)
+    .enter().append("g")
+      .attr("class", "city");
+
+  city.append("path")
+      .attr("class", "line")
+      .attr("d", function(d) { return line(d.values); })
+      .style("stroke", function(d) { return z(d.id); });
+
+  city.append("text")
+      .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
+      .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
+      .attr("x", 3)
+      .attr("dy", "0.35em")
+      .style("font", "10px sans-serif")
+      .text(function(d) { return d.id; });
+      */
 });
+
+function type(d, _, columns) {
+  d.date = parseTime(d.date);
+  for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
+  return d;
 }
-*/
+
+}
+
+
 function drawgroupedbarchart(){
 
-    var margin = {top: 40, right: 20, bottom: 30, left: 40},
+    var margin = {top: 50, right: 20, bottom: 30, left: 40},
     width = 1500,
     height = 500;
 
@@ -176,11 +194,19 @@ function drawgroupedbarchart(){
 
     svg_bar.append("text")
       .attr("x", width/4)
-      .attr("y", -20)
+      .attr("y", -30)
       .style("fill","red")
       .style("font-size","25px")
       .style("text-anchor", "start")
       .text("Maximum and Minimum Salary per State");
+
+    svg_bar.append("text")
+      .attr("x", width/4)
+      .attr("y", -10)
+      .style("fill","#a0e")
+      .style("font-size","15px")
+      .style("text-anchor", "start")
+      .text("Click on a bar to know more");
 
 
     d3.json("/h1b/alldata", function(error, data) {
@@ -252,7 +278,8 @@ function drawgroupedbarchart(){
         state
         .on("mouseout", function(d){
             divTooltip.style("display", "none");
-        });
+        })
+        .on("click",updateTable);
 
 
   var legend = svg_bar.selectAll(".legend")
@@ -274,16 +301,23 @@ function drawgroupedbarchart(){
       .style("text-anchor", "end")
       .text(function(d) { return d; });
  
-  console.log(legend);
 });
+
+    function updateTable(d){
+        var id = short_name_id_map[d.State];
+        $('#jobtitlewithmaxsalary-value').html(job_title_with_max_salary_by_state[id]);
+        $('#max_salary-value').html(max_salary_by_state[id]);
+        $('#jobtitlewithminsalary-value').html(job_title_with_min_salary_by_state[id]);
+        $('#min_salary-value').html(min_salary_by_state[id]);
+    }
 }
 
 function drawmap(){
 
 var centered;
-var margin = {top: 140, right: 20, bottom: 30, left: 40};
+var margin = {top: 40, right: 20, bottom: 30, left: 40};
 var width = 700;
-var height = 650;
+var height = 750;
 var projection = d3.geo.albersUsa().scale(500).translate([ width / 4, height / 3 ]);
 var path = d3.geo.path().projection(projection);
 
@@ -355,9 +389,6 @@ d3.json("/h1b/alldata", function(error, data) {
         .on("mouseout", function(d){
             divTooltip.style("display", "none");
         });
-        console.log(divTooltip);
-          //.on('mouseover', function(d){ d3.select(this).style({fill: 'purple'}) })
-          //.on('mouseout', function(d){ d3.select(this).style({fill: 'brown'}) });
         
         g.append("path")
           .datum(topojson.mesh(us, us.objects.states, function(a, b) {return a !== b;}))
@@ -400,32 +431,6 @@ d3.json("/h1b/alldata", function(error, data) {
             .style("font-size","15px")
             .style("text-anchor", "end")
             .text("Click on a state or select from drop down to know more");
-        
-        d3.select("#canvas-svg")
-        	.append("div")
-          	.attr("id", "max_salary");
-        $("#max_salary").html("<table><tr><td><h4>Job Title with the Maximum Salary</h4>" + "<h3 id='jobtitlewithmaxsalary-value'><span class='no-data'>No Data</span></h3></td><td><h4>Maximum Salary </h4>" + "<h3 id='max_salary-value'><span class='no-data'>No Data</span></h3></td></tr></table>");
-        
-        d3.select("#canvas-svg")
-        	.append("div")
-          	.attr("id", "min_salary");
-        $("#min_salary").html("<h4>Minimum Salary </h4>" + "<h3 id='min_salary-value'><span class='no-data'>No Data</span></h3>");
-        
-        d3.select("#canvas-svg")
-          	.append("div")
-            .attr("id", "jobtitlewithminsalary");
-        $("#jobtitlewithminsalary").html("<h4>Job Title with the Minimum Salary</h4>" + "<h3 id='jobtitlewithminsalary-value'><span class='no-data'>No Data</span></h3>");
-        
-        d3.select("#canvas-svg")
-        	.append("div")
-          	.attr("id", "maxcertifiedjobtitle");
-        $("#maxcertifiedjobtitle").html("<h4>Job Title with Maximum certifications </h4>" + "<h3 id='maxcertifiedjobtitle-value'><span class='no-data'>No Data</span></h3>" + "<h5>Total certified: <span id='jtmaxno-value'></span></h5>");
-        
-        d3.select("#canvas-svg")
-        	.append("div")
-          	.attr("id", "maxcertifiedemployername");
-        $("#maxcertifiedemployername").html("<h4>Employer with Maximum certifications </h4>" + "<h3 id='maxcertifiedemployername-value'><span class='no-data'>No Data</span></h3>" + "<h5>Total certified: <span id='enmaxno-value'></span></h5>");
-        
 
         $("#state-select").val(0);
         var topo = id_topo_map[0];
@@ -439,26 +444,10 @@ function map_clicked(d) {
         $('#statenamevalue').html(short_name_id_map[d.id]);
         drawpiechart(d);
         $("#state-select").val(d.id);
-        if (max_salary_by_state[d.id]) {
-            $("#max_salary-value").html(max_salary_by_state[d.id]);
-            $("#jobtitlewithmaxsalary-value").html(job_title_with_max_salary_by_state[d.id]);
-            $("#min_salary-value").html(min_salary_by_state[d.id]);
-            $("#jobtitlewithminsalary-value").html(job_title_with_min_salary_by_state[d.id]);
             $("#maxcertifiedjobtitle-value").html(max_certified_job_title_by_state[d.id]);
             $("#maxcertifiedemployername-value").html(max_certified_employer_name_by_state[d.id]);
             $("#jtmaxno-value").html(total_certified_job_title_by_state[d.id]);
             $("#enmaxno-value").html(total_certified_employer_name_by_state[d.id]);
-            } 
-            else {
-            $("#max_salary-value").html("<span class='no-data'>No Data</span>");
-            $("#jobtitlewithmaxsalary-value").html("<span class='no-data'>No Data</span>");
-            $("#min_salary-value").html("<span class='no-data'>No Data</span>");
-            $("#jobtitlewithminsalary-value").html("<span class='no-data'>No Data</span>");
-            $("#maxcertifiedjobtitle-value").html("<span class='no-data'>No Data</span>");
-            $("#maxcertifiedemployername-value").html("<span class='no-data'>No Data</span>");
-            $("#jtmaxno-value").html("");
-            $("#enmaxno-value").html("");
-        	}
         var x, y, k;
         if (d && centered !== d) {
             var centroid = path.centroid(d);

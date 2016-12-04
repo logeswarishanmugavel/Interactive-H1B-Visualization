@@ -12,6 +12,16 @@
     shape-rendering: crispEdges;
 }
 
+.axis--x path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
 .states {
   fill: steelblue;
 }
@@ -88,7 +98,7 @@ font-size: 20px;
 #pie-chart {
   position: absolute;
   left: 700px;
-  top:750px;
+  top:1000px;
 }
 
 #line-chart {
@@ -108,91 +118,73 @@ font-size: 20px;
 #state-select {
   position: absolute;
   font: 15px sans-serif;
-  top: 100px;
+  top: 200px;
   left: 50px;
   width: 150px;
   height: 30px;
 }
 
-#max_salary {
+#t1 {
   position: absolute;
-  font-family: fantasy;
-  top: 600px;
-  left: 460px;
+  font: 15px Helvetica;
+  background: white;
+  left: 850px;
+  top:200px;
+  width: 550px;
+  height: 50px;
+  font-weight: normal;
+  border-top: 1px solid #C1C3D1;
+  border-bottom: 1px solid #C1C3D1;
+  border-left: 1px solid #C1C3D1;
+  border-right:1px solid #C1C3D1;
+}
+
+
+#t2 {
+  position: absolute;
+  font: 15px Helvetica;
+  background: white;
+  left: 800px;
+  top:700px;
+  width: 550px;
+  height: 50px;
+  font-weight: normal;
+  border-top: 1px solid #C1C3D1;
+  border-bottom: 1px solid #C1C3D1;
+  border-left: 1px solid #C1C3D1;
+  border-right:1px solid #C1C3D1;
+}
+
+td {
+  padding:10px;
+  border-top: 1px solid #C1C3D1;
+  border-bottom: 1px solid #C1C3D1;
+  border-left: 1px solid #C1C3D1;
+  border-right:1px solid #C1C3D1;
+}
+
+.text-left {
   text-align: left;
 }
 
-#max_salary > h3 {
-  color: steelblue;
+.text-center {
+  text-align: center;
 }
 
-#jobtitlewithmaxsalary {
-  position: absolute;
-  font-family: fantasy;
-  top: 600px;
-  left: 620px;
-  text-align: left;
+.text-right {
+  text-align: right;
+}
+  
+tr:nth-child(odd) td {
+  background:#EBEBEB;
+  font-weight: bold;
 }
 
-#jobtitlewithmaxsalary > h3 {
-  color: #E35B5E;
-}
-
-#min_salary {
-  position: absolute;
-  font-family: fantasy;
-  top: 750px;
-  left: 460px;
-  text-align: left;
-}
-
-#min_salary > h3 {
-  color: steelblue;
-}
-
-#jobtitlewithminsalary {
-  position: absolute;
-  font-family: fantasy;
-  top: 750px;
-  left: 620px;
-  text-align: left;
-}
-#statenamevalue {
-  position: absolute;
-  top: 100px;
-  left: 650px;
-}
-
-#jobtitlewithminsalary > h3 {
-  color: #E35B5E;
-}
-
-#maxcertifiedjobtitle {
-  position: absolute;
-  font-family: fantasy;
-  top: 600px;
-  left: 150px;
-  text-align: left;
-}
-
-#maxcertifiedjobtitle > h3 {
-  color: #E35B5E;
-}
-#maxcertifiedjobtitle-value {
-  color: green;
-}
-#maxcertifiedemployername {
-  position: absolute;
-  font-family: fantasy;
-  top: 750px;
-  left: 150px;
-  text-align: left;
-}
-
-#maxcertifiedemployername > h3 {
-  color: #E35B5E;
+tr:nth-child(even):hover td {
+  background:steelblue;
 }
 
 span.no-data {
   font-size: 30px;
 }
+

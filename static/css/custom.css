@@ -12,25 +12,29 @@
     shape-rendering: crispEdges;
 }
 
-.state {
+.states {
   fill: steelblue;
 }
+
+.states .active {
+  fill: orange;
+}
+
+#state-borders {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
 .bar {
   fill: steelblue;
 }
 
 .x.axis path {
   display: none;
-}
-
-#states {
-  fill: brown;
-  stroke: #fff;
-  stroke-linejoin: round;
-}
-
-.states .active {
-  fill: orange;
 }
 
 .arc text {
@@ -49,7 +53,7 @@
 }
 
 .legend {
-font-size: 12px;
+font-size: 20px;
 }
 
 .center-txtvalue {
@@ -58,18 +62,22 @@ font-size: 12px;
   color: brown;
 }
 
-div.tooltip { 
-    position: absolute;     
-    text-align: center;     
-    width: 60px;          
-    height: 28px;         
-    padding: 2px;       
-    font: 12px sans-serif;    
-    background: lightsteelblue; 
-    border: 0px;    
-    border-radius: 8px;     
-    pointer-events: none;     
+.toolTip {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    position: absolute;
+    display: none;
+    width: auto;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    border: 0 none;
+    border-radius: 8px 8px 8px 8px;
+    box-shadow: -3px 3px 15px #888888;
+    color: black;
+    font: 12px sans-serif;
+    padding: 5px;
+    text-align: center;
 }
+
 
 #bar-chart {
   position: absolute;
@@ -89,14 +97,7 @@ div.tooltip {
   top:750px;
 }
 
-#state-borders {
-  fill: brown;
-  stroke: #fff;
-  stroke-width: 1.5px;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  pointer-events: none;
-}
+
 
 #canvas-svg {
  position: absolute;

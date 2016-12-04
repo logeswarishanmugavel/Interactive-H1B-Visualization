@@ -61,8 +61,9 @@ var state_link = {
 
 drawmap();
 drawgroupedbarchart();
-drawlinechart();
 
+//drawlinechart();
+/*
 function drawlinechart(){
     var margin = {top: 30, right: 20, bottom: 30, left: 50},
     width = 600 - margin.left - margin.right,
@@ -133,10 +134,10 @@ d3.csv("./static/data/data.csv", function(error, data) {
 
 });
 }
-
+*/
 function drawgroupedbarchart(){
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    var margin = {top: 40, right: 20, bottom: 30, left: 40},
     width = 1500,
     height = 500;
 
@@ -157,25 +158,29 @@ function drawgroupedbarchart(){
         .scale(x0)
         .orient("bottom");
 
+
     var yAxis = d3.svg.axis()
         .scale(y)
         .orient("left")
         .tickFormat(d3.format(".2s"));
 
+   var divTooltip = d3.select("body").append("div").attr("class", "toolTip");
+  
+
     var svg_bar = d3.select("#bar-chart").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-        .style("text-decoration", "underline") 
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    svg_bar.append("text")
-      .attr("x", width/2)
-      .attr("y", height)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
-      .text("Maximum and Minimum Salary per State");
 
+    svg_bar.append("text")
+      .attr("x", width/4)
+      .attr("y", -20)
+      .style("fill","red")
+      .style("font-size","25px")
+      .style("text-anchor", "start")
+      .text("Maximum and Minimum Salary per State");
 
 
     d3.json("/h1b/alldata", function(error, data) {
@@ -220,7 +225,7 @@ function drawgroupedbarchart(){
     var state = svg_bar.selectAll(".state")
       .data(bardata)
     .enter().append("g")
-      .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; });
+      .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; })
 
     state.selectAll("rect")
       .data(function(d) { return d.ages; })
@@ -230,7 +235,25 @@ function drawgroupedbarchart(){
       .attr("y", function(d) { return y(d.value); })
       .attr("height", function(d) { return height - y(d.value); })
       .style("fill", function(d) { return color(d.name); });
-      
+  
+      state
+        .on("mousemove", function(d){
+            divTooltip.style("left", d3.event.pageX+10+"px");
+            divTooltip.style("top", d3.event.pageY-25+"px");
+            divTooltip.style("display", "inline-block");
+            var x = d3.event.pageX, y = d3.event.pageY
+            var elements = document.querySelectorAll(':hover');
+            l = elements.length
+            l = l-1
+            var id = short_name_id_map[d.State];
+            elementData = elements[l].__data__
+            divTooltip.html((id_name_map[id].name)+"<br>"+elementData.name+" : $"+elementData.value);
+        });
+        state
+        .on("mouseout", function(d){
+            divTooltip.style("display", "none");
+        });
+
 
   var legend = svg_bar.selectAll(".legend")
       .data(Names.slice().reverse())
@@ -239,13 +262,13 @@ function drawgroupedbarchart(){
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   legend.append("rect")
-      .attr("x", width - 18)
+      .attr("x", 230)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   legend.append("text")
-      .attr("x", width - 24)
+      .attr("x", 224)
       .attr("y", 9)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
@@ -258,9 +281,14 @@ function drawgroupedbarchart(){
 function drawmap(){
 
 var centered;
-var width = 700, height = 650;
+var margin = {top: 140, right: 20, bottom: 30, left: 40};
+var width = 700;
+var height = 650;
 var projection = d3.geo.albersUsa().scale(500).translate([ width / 4, height / 3 ]);
 var path = d3.geo.path().projection(projection);
+
+var divTooltip = d3.select("body").append("div").attr("class", "toolTip");
+
 var svg = d3.select("#canvas-svg")
             .append("svg")
               .attr("width", width)
@@ -301,6 +329,7 @@ d3.json("/h1b/alldata", function(error, data) {
     d3.json("./static/data/us.json", function(error, us) {
         g.append("g")
           .attr("id", "states")
+          .attr("class","states")
           .attr("transform", "scale(" + SCALE + ")")
           .selectAll("path")
           .data(topojson.feature(us, us.objects.states).features)
@@ -312,16 +341,36 @@ d3.json("/h1b/alldata", function(error, data) {
             id_state_map[d.id] = id_name_map[d.id].name;
             id_topo_map[d.id] = d;
             return "map-" + d.id; 
-        }).on("click", map_clicked);
+        }).on("click", map_clicked)
+          .on("mouseover", function(d){
+            divTooltip.style("left", d3.event.pageX+10+"px");
+            divTooltip.style("top", d3.event.pageY-25+"px");
+            divTooltip.style("display", "inline-block");
+            var x = d3.event.pageX, y = d3.event.pageY
+            var elements = document.querySelectorAll(':hover');
+            l = elements.length
+            l = l-1
+            elementData = elements[l].__data__
+            divTooltip.html(id_name_map[d.id].name);})
+        .on("mouseout", function(d){
+            divTooltip.style("display", "none");
+        });
+        console.log(divTooltip);
+          //.on('mouseover', function(d){ d3.select(this).style({fill: 'purple'}) })
+          //.on('mouseout', function(d){ d3.select(this).style({fill: 'brown'}) });
         
         g.append("path")
           .datum(topojson.mesh(us, us.objects.states, function(a, b) {return a !== b;}))
           .attr("id", "state-borders")
           .attr("transform", "scale(" + SCALE + ")")
-          .attr("d", path);
+          .attr("d", path)
+          .on('mouseover', function(d){ d3.select(this).style({fill: 'purple'}) })
+          .on('mouseout', function(d){ d3.select(this).style({fill: 'brown'}) });;
+          
         state_ids = state_ids.sort(function(a, b) {
             return a - b;
         });
+
         d3.select("#canvas-svg").append("select")
           .attr("id", "state-select")
           .on("change", function() {
@@ -335,6 +384,22 @@ d3.json("/h1b/alldata", function(error, data) {
         }).text(function(d) {
             return id_state_map[d];
         });
+
+            g.append("text")
+            .attr("x", width)
+            .attr("y", 70)
+            .style("fill","red")
+            .style("font-size","30px")
+            .style("text-anchor", "end")
+            .text("Statewise Analysis");
+
+            g.append("text")
+            .attr("x", width)
+            .attr("y", 90)
+            .style("fill","#a0e")
+            .style("font-size","15px")
+            .style("text-anchor", "end")
+            .text("Click on a state or select from drop down to know more");
         
         d3.select("#canvas-svg")
         	.append("div")
@@ -407,7 +472,7 @@ function map_clicked(d) {
             k = 1;
             centered = null;
         }
-        g.selectAll("path").classed("active", centered && function(d) {
+        g.selectAll("path").classed("active", function(d) {
             return d === centered;
         });
     }

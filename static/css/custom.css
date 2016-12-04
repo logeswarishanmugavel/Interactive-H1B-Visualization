@@ -1,0 +1,115 @@
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+#states {
+  fill: #999;
+  stroke: #fff;
+  stroke-linejoin: round;
+}
+
+.states .active {
+  fill: orange;
+}
+
+#state-borders {
+  fill: #999;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+
+#canvas-svg {
+  position: relative;
+}
+
+#state-select {
+  position: absolute;
+  top: 100px;
+  left: 150px;
+  width: 150px;
+  height: 30px;
+}
+
+#max_salary {
+  position: absolute;
+  font-family: fantasy;
+  top: 600px;
+  left: 460px;
+  text-align: left;
+}
+
+#max_salary > h3 {
+  color: steelblue;
+}
+
+#jobtitlewithmaxsalary {
+  position: absolute;
+  font-family: fantasy;
+  top: 600px;
+  left: 620px;
+  text-align: left;
+}
+
+#jobtitlewithmaxsalary > h3 {
+  color: #E35B5E;
+}
+
+#min_salary {
+  position: absolute;
+  font-family: fantasy;
+  top: 750px;
+  left: 460px;
+  text-align: left;
+}
+
+#min_salary > h3 {
+  color: steelblue;
+}
+
+#jobtitlewithminsalary {
+  position: absolute;
+  font-family: fantasy;
+  top: 750px;
+  left: 620px;
+  text-align: left;
+}
+
+#jobtitlewithminsalary > h3 {
+  color: #E35B5E;
+}
+
+#maxcertifiedjobtitle {
+  position: absolute;
+  font-family: fantasy;
+  top: 600px;
+  left: 150px;
+  text-align: left;
+}
+
+#maxcertifiedjobtitle > h3 {
+  color: #E35B5E;
+}
+#maxcertifiedjobtitle-value {
+  color: green;
+}
+#maxcertifiedemployername {
+  position: absolute;
+  font-family: fantasy;
+  top: 750px;
+  left: 150px;
+  text-align: left;
+}
+
+#maxcertifiedemployername > h3 {
+  color: #E35B5E;
+}
+
+span.no-data {
+  font-size: 30px;
+}

@@ -1,15 +1,4 @@
 
-var width = 980, height = 650, centered;
-var projection = d3.geo.albersUsa().scale(500).translate([ width / 4, height / 3 ]);
-var path = d3.geo.path().projection(projection);
-var svg = d3.select("#canvas-svg")
-            .append("svg")
-              .attr("width", width)
-              .attr("height", height);
-
-
-var g = svg.append("g");
-
 var SCALE = 1.7;
 var state_ids = [ 0 ];
 var id_state_map = {
@@ -19,6 +8,9 @@ var id_topo_map = {
     1: null
 };
 var statename = {
+    1: ""
+}
+var totalapplications_by_state = {
     1: ""
 }
 var total_certified_by_state = {
@@ -67,6 +59,20 @@ var state_link = {
     0: null
 };
 
+var centered;
+var width = 700, height = 650;
+var projection = d3.geo.albersUsa().scale(500).translate([ width / 4, height / 3 ]);
+var path = d3.geo.path().projection(projection);
+var svg = d3.select("#canvas-svg")
+            .append("svg")
+              .attr("width", width)
+              .attr("height", height);
+var g = svg.append("g");
+
+drawmap();
+
+function drawmap(){
+
 d3.json("/h1b/alldata", function(error, data) {
 	d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
       //  console.log(names);
@@ -84,6 +90,7 @@ d3.json("/h1b/alldata", function(error, data) {
         total_certifiedwithdrawn_by_state[state_id] = d.certifiedwithdrawn;
         total_withdrawn_by_state[state_id] = d.withdrawn;
         total_denied_by_state[state_id] = d.denied;
+        totalapplications_by_state[state_id] = d.certified + d.certifiedwithdrawn + d.denied + d.withdrawn;
 
         max_certified_job_title_by_state[state_id] = d.maxcertifiedjobtitle;
         total_certified_job_title_by_state[state_id] = d.jtmaxno;
@@ -168,11 +175,10 @@ d3.json("/h1b/alldata", function(error, data) {
     });
 });
 });
-    
+}
 function map_clicked(d) {
     if (d) {
         $('#statenamevalue').html(short_name_id_map[d.id]);
-        console.log(d);
         drawpiechart(d);
         $("#state-select").val(d.id);
         if (max_salary_by_state[d.id]) {
@@ -216,12 +222,11 @@ function map_clicked(d) {
 
 function drawpiechart(d){
     if (total_certified_by_state[d.id]) {
-    //console.log("drawing pie chart");
-    //console.log(d);
-    
     $('#pie-chart').html("");
-    var data = [{"name":"CERTIFIED","value":total_certified_by_state[d.id]},{"name":"WITHDRAWN","value":total_withdrawn_by_state[d.id]},{"name":"CERTIFIEDWITHDRAWN","value":total_certifiedwithdrawn_by_state[d.id]},{"name":"DENIED","value":total_denied_by_state[d.id]}];
-    //console.log(data);
+    var data = [{"name":"CERTIFIED","value":total_certified_by_state[d.id],"percent":(total_certified_by_state[d.id]/totalapplications_by_state[d.id])*100},
+                {"name":"WITHDRAWN","value":total_withdrawn_by_state[d.id],"percent":(total_withdrawn_by_state[d.id]/totalapplications_by_state[d.id])*100},
+                {"name":"CERTIFIEDWITHDRAWN","value":total_certifiedwithdrawn_by_state[d.id],"percent":(total_certifiedwithdrawn_by_state[d.id]/totalapplications_by_state[d.id])*100},
+                {"name":"DENIED","value":total_denied_by_state[d.id],"percent":(total_denied_by_state[d.id]/totalapplications_by_state[d.id])*100}];
 
     var r = d3.scale.category20();
 
@@ -241,97 +246,109 @@ function drawpiechart(d){
         .sort(null)
         .value(function(d) { return d.value; });
 
-    var svg = d3.select("#pie-chart").append("svg")
+    var svg_pie = d3.select("#pie-chart").append("svg")
         .attr('class','pie-chartclass')
         .attr("width", width)
         .attr("height", height)
         .append("g")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-    var g = svg.selectAll(".arc")
+    var g_pie = svg_pie.selectAll(".arc")
         .data(pie(data))
         .enter().append("g")
         .attr("class", "arc");
 
-    g.append("path")
+    g_pie.append("path")
         .attr("d", arc)
         .style("fill", function(d) { return color(d.data.name); })
         .on("mouseover",setCenterText)
         .on("mouseout",resetCenterText);
 
-/*
-    g.append("text")
-        .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-        .attr("dy", ".35em")
-        .text(function(d) { return d.data.value; });
-    */
-    g.append('text')
+    g_pie.append('text')
         .attr('class', 'statenamevalue')
         .attr('text-anchor', 'middle')
         .style('font-size','30px')
+        .attr('y', '-25px')
         .style('font-family','Helvetica')
         .style('fill','brown');
 
-     g.select(".statenamevalue")
+     g_pie.select(".statenamevalue")
             .text(id_name_map[d.id].name);
 
-    g.append('text')
+    g_pie.append('text')
         .attr('class', 'center-txtname')
-        .attr('y', '25px')
+        .attr('y', '5px')
         .attr('text-anchor', 'middle')
         .style('font-size','15px')
         .style('font-family','Helvetica')
         .style('fill','blue');
 
-    g.append('text')
+    g_pie.select(".center-txtname")
+            .text("Hover to see values");
+
+    g_pie.append('text')
         .attr('class', 'center-txtvalue')
-        .attr('y', '50px')
+        .attr('y', '30px')
         .attr('text-anchor', 'middle')
         .style('font-size','20px')
         .style('font-family','Helvetica')
         .style('fill','red');
         ;
-    /*
-    d3.select("#pie-chart")
-            .append("div")
-            .attr("id", "center-txtvalue");
 
+    g_pie.append('text')
+        .attr('class', 'center-txtpercent')
+        .attr('x','3px')
+        .attr('y', '55px')
+        .attr('text-anchor', 'middle')
+        .style('font-size','20px')
+        .style('font-family','Helvetica')
+        .style('fill','magenta');
+        ;
+
+    g_pie.append('legends')
+        .attr('class', 'legend');
+
+    
+   /* var piechartnames = ['CERTIFIED','WITHDRAWN','CERTIFIEDWITHDRAWN','DENIED'];
+    
+    var legends = g.select('#pie-chart')
+                    .select('g_pie')
+                    .data(piechartnames)
+                    .enter().append('g')
+                    .attr('class','legend')
+                                
+            var ls_w = 20, ls_h = 20;
+
+            legends.append("rect")
+                    .attr("x", 20)
+                    .attr("y", function(d, i){ return height - (i*ls_h) - 2*ls_h;})
+                    .attr("width", ls_w)
+                    .attr("height", ls_h)
+                    .style("fill", function(d, i) { return color(i); })
+                    .style("opacity", 0.8);
+            
+            legends.append("text")
+                    .attr("x", 50)
+                    .attr("y", function(d, i){ return height - (i*ls_h) - ls_h - 4;})
+                    .text(function(d, i){ return piechartnames[i]; });
+
+    console.log(legends);
     */
-
-    var piechartnames = ['CERTIFIED','WITHDRAWN','CERTIFIEDWITHDRAWN','DENIED'];
     
-    var legends = g.select('.legend')
-                    .selectAll('g')
-                                .data(piechartnames)
-                            .enter().append('g')
-                                .attr('transform', function(d, i) {
-                                    return 'translate(' + (i * 150 + 50) + ', 10)';
-                                });
-    
-            legends.append('circle')
-                .attr('class', 'legend-icon')
-                .attr('r', 6)
-                .style('fill', function(d, i) {
-                    return color(i);
-                });
-    
-            legends.append('text')
-                .attr('dx', '1em')
-                .attr('dy', '.3em')
-                .text(function(d) {
-                    return d;
-                });
-
     function setCenterText(d){
-        g.select(".center-txtname")
+        g_pie.select(".center-txtname")
             .text(d.data.name);
-        g.select(".center-txtvalue")
+        g_pie.select(".center-txtvalue")
             .text(d.data.value);
+        g_pie.select(".center-txtpercent")
+            .text(d.data.percent.toFixed(2)+"%");
     }
     function resetCenterText(d){
-        g.select(".center-txtname")
+        g_pie.select(".center-txtname")
             .text("Hover to see values");
-         g.select(".center-txtvalue")
+         g_pie.select(".center-txtvalue")
+            .text("");
+        g_pie.select(".center-txtpercent")
             .text("");
     }
     }

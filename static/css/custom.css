@@ -28,9 +28,12 @@
   text-anchor: middle;
   color: brown;
 }
+
 .legend {
-  position: relative;
+font-size: 12px;
+position: relative;
 }
+
 .center-txtvalue {
   font: 30px sans-serif;
   text-anchor: middle;
@@ -38,7 +41,7 @@
 }
 #pie-chart {
   position: absolute;
-  left: 600px;
+  left: 700px;
   top:250px;
 }
 #state-borders {
@@ -52,12 +55,13 @@
 
 #canvas-svg {
  position: absolute;
-  left: 0px;
+  left: 50px;
   top:150px;
 }
 
 #state-select {
   position: absolute;
+  font: 15px sans-serif;
   top: 100px;
   left: 50px;
   width: 150px;

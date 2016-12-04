@@ -22,7 +22,7 @@ def index():
 def alldata():
     connection = MongoClient(MONGODB_HOST, MONGODB_PORT)
     collection = connection[DBS_NAME]['2016']
-    applications = collection.find(projection=FIELDS, limit=50)
+    applications = collection.find(projection=FIELDS, limit=100)
     json_applications = []
     for application in applications:
         json_applications.append(application)

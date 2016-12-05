@@ -23,7 +23,7 @@
 }
 
 .states {
-  fill: steelblue;
+  fill: grey;
 }
 
 .states .active {
@@ -66,6 +66,10 @@
 font-size: 20px;
 }
 
+.linelegend {
+font-size: 15px;
+}
+
 .center-txtvalue {
   font: 30px sans-serif;
   text-anchor: middle;
@@ -88,6 +92,32 @@ font-size: 20px;
     text-align: center;
 }
 
+#wordcloud1title{
+  position: absolute;
+  left: 450px;
+  top: 1500px;
+  color: #AA8939;
+  font-size: 25px;
+  font-family: Helvetica;
+}
+
+#wordcloud2title{
+  position: absolute;
+  left: 450px;
+  top: 2000px;
+  color: #AA8939;
+  font-size: 25px;
+  font-family: Helvetica;
+}
+
+#wordcloud3title{
+  position: absolute;
+  left: 450px;
+  top: 2500px;
+  color: #AA8939;
+  font-size: 25px;
+  font-family: Helvetica;
+}
 
 #bar-chart {
   position: absolute;
@@ -101,18 +131,34 @@ font-size: 20px;
   top:1000px;
 }
 
+#wordcloud1 {
+  position: absolute;
+  left: 100px;
+  top:1600px;
+}
+
+#wordcloud2 {
+  position: absolute;
+  left: 100px;
+  top:2100px;
+}
+
+#wordcloud3 {
+  position: absolute;
+  left: 100px;
+  top:2700px;
+}
+
 #line-chart {
   position: absolute;
   left: 50px;
-  top:1400px;
+  top:3300px;
 }
-
-
 
 #canvas-svg {
  position: absolute;
   left: 50px;
-  top:650px;
+  top:700px;
 }
 
 #state-select {
@@ -145,7 +191,7 @@ font-size: 20px;
   font: 15px Helvetica;
   background: white;
   left: 800px;
-  top:700px;
+  top:800px;
   width: 550px;
   height: 50px;
   font-weight: normal;

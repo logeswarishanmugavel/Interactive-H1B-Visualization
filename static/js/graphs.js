@@ -62,11 +62,175 @@ var state_link = {
 drawmap();
 drawgroupedbarchart();
 drawlinechart();
+drawwordcloud1();
+drawwordcloud2();
+drawwordcloud3();
+
+function drawwordcloud1(){
+
+  $('#wordcloud1title').html("US States & their total certified applications");
+  var frequency_list = [];
+
+  var color = d3.scale.linear()
+            .domain([0,1,2,3,4,5,6,10,15,20])
+            .range(["#544F4F", "#604F4F", "#664F4F", "#724F4F", "#784F4F", "#844F4F", "#904F4F", "#964F4F", "#A24F4F", "#B24F4F"]);
+
+    d3.json("/h1b/alldata", function(error, data) {
+        d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
+            if (error) throw error;
+            
+            for (var i = 0; i < names.length; i++) {
+                id_name_map[names[i].id] = names[i];
+                short_name_id_map[names[i].code] = names[i].id;
+            }
+        
+
+        data.forEach(function(d) {
+            total = d.certified + d.certifiedwithdrawn + d.withdrawn + d.denied;
+            var state_id = short_name_id_map[d.employer_state];
+            //console.log(d);
+            //console.log(id_name_map);
+            //console.log(names[id].name);
+            frequency_list.push({"text":id_name_map[state_id].name, "size":parseInt((((d.certified/total)*100).toFixed(0))-80)*1.5 });
+        });
+
+    d3.layout.cloud().size([1200, 300])
+            .words(frequency_list)
+            .rotate(0)
+            .fontSize(function(d) { return d.size; })
+            .on("end", drawCloud)
+            .start();
+
+
+
+    function drawCloud(words) {
+        //console.log(words);
+        d3.select("#wordcloud1").append("svg")
+                .attr("width", 1200)
+                .attr("height", 300)
+                .attr("class", "wordcloud")
+                .append("g")
+                .attr("transform", "translate(320,200)")
+                .selectAll("text")
+                .data(frequency_list)
+                .enter().append("text")
+                .style("font-size", function(d) { 
+                    if(d){
+                    return d.size + "px"; }})
+                .style("fill", function(d, i) { return color(i); })
+                .attr("transform", function(d) {
+                    if(d){return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"};
+                })
+                .text(function(d) { if(d){return d.text; }});
+    }
+  });
+    });
+}
+
+function drawwordcloud2(){
+
+  $('#wordcloud2title').html("Job titles & their total certified applications");
+  var frequency_list = [];
+
+  var color = d3.scale.linear()
+            .domain([0,1,2,3,4,5,6,10,15,20])
+            .range(["#4F544F", "#4F604F", "#4F664F", "#4F724F", "#4F784F", "#4F844F", "#4F904F", "#4F964F", "#4FA24F", "#4FB24F"]);
+
+    d3.json("/h1b/alldata", function(error, data) {
+            if (error) throw error;
+        
+
+        data.forEach(function(d) {
+            //console.log(d);
+            frequency_list.push({"text":d.maxcertifiedjobtitle, "size":d.jtmaxno/200});
+        });
+
+    d3.layout.cloud().size([1200, 300])
+            .words(frequency_list)
+            .rotate(0)
+            .fontSize(function(d) { return d.size; })
+            .on("end", drawCloud)
+            .start();
+
+    
+
+    function drawCloud(words) {
+        //console.log(words);
+        d3.select("#wordcloud2").append("svg")
+                .attr("width", 1200)
+                .attr("height", 300)
+                .attr("class", "wordcloud")
+                .append("g")
+                .attr("transform", "translate(320,200)")
+                .selectAll("text")
+                .data(frequency_list)
+                .enter().append("text")
+                .style("font-size", function(d) { 
+                    return d.size + "px"; })
+                .style("fill", function(d, i) { return color(i); })
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+    }
+  });
+}
+
+function drawwordcloud3(){
+
+  $('#wordcloud3title').html("Employer names & their total certified applications");
+  var frequency_list = [];
+
+  var color = d3.scale.linear()
+            .domain([0,1,2,3,4,5,6,10,15,20])
+            .range(["#4F4F54", "#4F4F60", "#4F4F66", "#4F4F72", "#4F4F78", "#4F4F84", "#4F4F90", "#4F4F96", "#4F4FA2", "#4F4FB2"]);
+
+    d3.json("/h1b/alldata", function(error, data) {
+            if (error) throw error;
+        
+
+        data.forEach(function(d) {
+            //console.log(d);
+            frequency_list.push({"text":d.maxcertifiedemployername, "size":d.enmaxno/200});
+        });
+
+    d3.layout.cloud().size([1200, 300])
+            .words(frequency_list)
+            .rotate(0)
+            .fontSize(function(d) { return d.size; })
+            .on("end", drawCloud)
+            .start();
+
+    
+
+    function drawCloud(words) {
+        //console.log(words);
+        d3.select("#wordcloud3").append("svg")
+                .attr("width", 1200)
+                .attr("height", 300)
+                .attr("class", "wordcloud")
+                .append("g")
+                .attr("transform", "translate(320,200)")
+                .selectAll("text")
+                .data(frequency_list)
+                .enter().append("text")
+                .style("font-size", function(d) { 
+                    return d.size + "px"; })
+                .style("fill", function(d, i) { return color(i); })
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+    }
+  });
+}
+
+
 
 function drawlinechart(){
-    console.log("Drawing Line Chart")
-    var margin = {top: 20, right: 20, bottom: 30, left: 150},
-    width = 1500 - margin.left - margin.right,
+    //console.log("Drawing Line Chart")
+    var margin = {top: 200, right: 0, bottom: 30, left: 150},
+    width = 2000 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
     var linedata = [];
@@ -92,7 +256,21 @@ function drawlinechart(){
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    
+    svg.append("text")
+      .attr("x", width/4)
+      .attr("y", -160)
+      .style("fill","#AA8939")
+      .style("font-size","25px")
+      .style("text-anchor", "start")
+      .text("Application Status Analysis per State");
+
+    svg.append("text")
+      .attr("x", width/4)
+      .attr("y", -140)
+      .style("fill","#a0e")
+      .style("font-size","15px")
+      .style("text-anchor", "start")
+      .text("Hover the dot for values");
     d3.json("/h1b/alldata", function(error, data) {
         if (error) throw error;
 
@@ -111,8 +289,6 @@ function drawlinechart(){
         });
    });
         
-  //      console.log(seriesNames);
-  //  console.log(series);
        x.domain(linedata.map(function(d) { 
         return d.State; }));
        y.domain([0,10000]);
@@ -127,12 +303,16 @@ function drawlinechart(){
       .attr("transform", "translate(0,0)")
       .call(yAxis);
 
-      /*
-      svg.append("path")        
-        .datum(linedata)
-        .style("stroke", function(d, i) { return color(i); })
-        .attr("d", line);
-        */
+      svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+        .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("No. of applications");
+
 
       svg.selectAll(".series")
       .data(series)
@@ -163,6 +343,26 @@ function drawlinechart(){
         .on("mouseout", function(d){
             divTooltip.style("display", "none");
         });
+
+    var legend = svg.selectAll(".linelegend")
+      .data(seriesNames.slice().reverse())
+      .enter().append("g")
+      .attr("class", "linelegend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  legend.append("rect")
+      .attr("x", 930)
+      .attr("y", -120)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  legend.append("text")
+      .attr("x", 930)
+      .attr("y", -120)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d; });
 });
 }
 
@@ -209,7 +409,7 @@ function drawgroupedbarchart(){
     svg_bar.append("text")
       .attr("x", width/4)
       .attr("y", -30)
-      .style("fill","red")
+      .style("fill","#AA8939")
       .style("font-size","25px")
       .style("text-anchor", "start")
       .text("Maximum and Minimum Salary per State");
@@ -265,17 +465,28 @@ function drawgroupedbarchart(){
     var state = svg_bar.selectAll(".state")
       .data(bardata)
     .enter().append("g")
-      .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; })
+      .attr("transform", function(d) { if(d){return "translate(" + x0(d.State) + ",0)"; }})
 
+    state.append("rect")
+        .attr("class","bar1")
+        .style("fill", color(0))
+        .attr("width", x1.rangeBand()+20)
+      .attr("x", function(d) { if(d){return x1(d.State); }})
+      .attr("y", function(d) { if(d){return y(d.ages[0].value); }})
+      .attr("height", function(d) { if(d){return height - y(d.ages[0].value); }});
+
+      state.append("rect")
+        .attr("class","bar2")
+        .style("fill", color(1))
+        .attr("width", x1.rangeBand()+20)
+      .attr("x", function(d) { if(d){return x1(d.State); }})
+      .attr("y", function(d) { if(d){return y(3*(d.ages[1].value)); }})
+      .attr("height", function(d) { if(d){return height - y(3*(d.ages[1].value)); }});
+      
+  
     state.selectAll("rect")
       .data(function(d) { return d.ages; })
-    .enter().append("rect")
-      .attr("width", x1.rangeBand())
-      .attr("x", function(d) { return x1(d.name); })
-      .attr("y", function(d) { return y(d.value); })
-      .attr("height", function(d) { return height - y(d.value); })
-      .style("fill", function(d) { return color(d.name); });
-  
+    .enter().append("g");
       state
         .on("mousemove", function(d){
             divTooltip.style("left", d3.event.pageX+10+"px");
@@ -289,6 +500,7 @@ function drawgroupedbarchart(){
             elementData = elements[l].__data__
             divTooltip.html((id_name_map[id].name)+"<br>"+elementData.name+" : $"+elementData.value);
         });
+
         state
         .on("mouseout", function(d){
             divTooltip.style("display", "none");
@@ -433,7 +645,7 @@ d3.json("/h1b/alldata", function(error, data) {
             g.append("text")
             .attr("x", width)
             .attr("y", 70)
-            .style("fill","red")
+            .style("fill","#AA8939")
             .style("font-size","30px")
             .style("text-anchor", "end")
             .text("Statewise Analysis");
@@ -553,7 +765,7 @@ function drawpiechart(d){
         .attr('text-anchor', 'middle')
         .style('font-size','20px')
         .style('font-family','Helvetica')
-        .style('fill','red');
+        .style('fill','#AA8939');
         ;
 
     g_pie.append('text')
@@ -564,37 +776,7 @@ function drawpiechart(d){
         .style('font-size','20px')
         .style('font-family','Helvetica')
         .style('fill','magenta');
-        ;
-
-    g_pie.append('legends')
-        .attr('class', 'legend');
-
-    
-   /* var piechartnames = ['CERTIFIED','WITHDRAWN','CERTIFIEDWITHDRAWN','DENIED'];
-    
-    var legends = g.select('#pie-chart')
-                    .select('g_pie')
-                    .data(piechartnames)
-                    .enter().append('g')
-                    .attr('class','legend')
-                                
-            var ls_w = 20, ls_h = 20;
-
-            legends.append("rect")
-                    .attr("x", 20)
-                    .attr("y", function(d, i){ return height - (i*ls_h) - 2*ls_h;})
-                    .attr("width", ls_w)
-                    .attr("height", ls_h)
-                    .style("fill", function(d, i) { return color(i); })
-                    .style("opacity", 0.8);
-            
-            legends.append("text")
-                    .attr("x", 50)
-                    .attr("y", function(d, i){ return height - (i*ls_h) - ls_h - 4;})
-                    .text(function(d, i){ return piechartnames[i]; });
-
-    console.log(legends);
-    */
+        
     
     function setCenterText(d){
         g_pie.select(".center-txtname")

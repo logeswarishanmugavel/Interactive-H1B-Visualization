@@ -11,7 +11,7 @@ MONGODB_HOST = 'localhost'
 MONGODB_PORT = 27017
 DBS_NAME = 'h1b'
 FIELDS = {'maxcertifiedjobtitle': True, 'max_salary': True, 'maxcertifiedemployername': True, 'certifiedwithdrawn': True, 'jobtitlewithmaxsalary': True, 'jobtitlewithminsalary': True, 'withdrawn':True, 'certified':True, 'min_salary':True, 'enmaxno': True,'jtmaxno': True, 'denied':True,'employer_state':True, '_id': False}
-
+FIELDS2 = {'case_status': True, 'visa_class': True, 'employer_name': True, 'employer_city': True, 'employer_state': True, 'soc_code': True, 'soc_name': True,'prevailing_wage': True, '_id': False}
 
 @app.route("/")
 def index():

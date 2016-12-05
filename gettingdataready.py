@@ -19,7 +19,7 @@ collection = connection[DBS_NAME][COLLECTION_NAME]
 mycollection = connection[DBS_NAME][MY_COLLECTION_NAME]
 dummy = connection[DBS_NAME]['dummy']
 stateindex = 0
-	
+
 states = collection.distinct('employer_state')
 print states
 
@@ -44,6 +44,7 @@ for state in states:
     stateindex = stateindex + 1
     finalresult = mycollection.insert({"id":stateindex,"employer_state":state,"certified":certified,"certifiedwithdrawn":certifiedwithdrawn,"withdrawn":withdrawn,"denied":denied,"max_salary":maxsalary['prevailing_wage'],"jobtitlewithmaxsalary":maxsalary['job_title'],"min_salary":minsalary['prevailing_wage'],"jobtitlewithminsalary":minsalary['job_title'],"maxcertifiedjobtitle":jtmaxtitle,"jtmaxno":jtmaxno,"maxcertifiedemployername":enmaxtitle,"enmaxno":enmaxno})
     print finalresult
+
 
 #with open('data.json', 'w') as outfile:
 #    json.dump(json_applications, outfile)

@@ -269,9 +269,11 @@ function drawlinechart(){
   d3.json("/h1b/alldata", function(error, data) {
         if (error) throw error;
 
+
+
         data.forEach(function(d) {
             total = d.certified + d.certifiedwithdrawn + d.withdrawn + d.denied;
-            linedata.push({"State":d.employer_state,"CERTIFIED":((d.certified/total)*100).toFixed(2), "WITHDRAWN": ((d.withdrawn/total)*100).toFixed(2), "CERTIFIEDWITHDRAWN": ((d.certifiedwithdrawn/total)*100).toFixed(2), "DENIED":((d.denied/total)*100).toFixed(2)});
+            linedata[d.id]=({"State":d.employer_state,"CERTIFIED":((d.certified/total)*100).toFixed(2), "WITHDRAWN": ((d.withdrawn/total)*100).toFixed(2), "CERTIFIEDWITHDRAWN": ((d.certifiedwithdrawn/total)*100).toFixed(2), "DENIED":((d.denied/total)*100).toFixed(2)});
         });
 
         console.log(linedata);
@@ -293,20 +295,11 @@ function drawlinechart(){
 
         x.domain(linedata.map(function(d) { 
         return d.State; }));
-        console.log(x);
+        //console.log(x.domain());
         y.domain([0, 100]);
 
-        svg_line.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
-
-        svg_line.append("g")
-          .attr("class", "y axis")
-          .call(yAxis);
-
         
-        var layer = svg_line.selectAll(".layer")
+        var layer = svg_line.selectAll("svg")
           .data(layers)
           .enter().append("g")
           .attr("class", "layer");
@@ -318,19 +311,23 @@ function drawlinechart(){
           .attr("d", function(d) { return area(d.values); })
           .style("fill", function(d) { return color(d.name); });
 
-          console.log(layer);
-
         
         layer.append("text")
           .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-          .attr("transform", function(d) { 
-            console.log(d);
+          .attr("transform", function(d) {
             return "translate(" + x(d.value.State) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
           .attr("x", -5)
           .attr("dy", ".35em")
           .text(function(d) { return d.name; });
           
+           svg_line.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
 
+        svg_line.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
          
 
 
@@ -542,7 +539,7 @@ function drawgroupedbarchart(){
 
 
         data.forEach(function(d) {
-            bardata.push({"State":d.employer_state,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});
+            bardata[d.id]=({"State":d.employer_state,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});
         });
 
         console.log(bardata);
@@ -578,7 +575,7 @@ function drawgroupedbarchart(){
     svg_bar.append("g")
       .attr("class", "state");
 
-    var state = svg_bar.selectAll(".state")
+    var state = svg_bar.selectAll("svg")
       .data(bardata)
     .enter().append("g")
       .attr("transform", function(d) { if(d){return "translate(" + x0(d.State) + ",0)"; }})

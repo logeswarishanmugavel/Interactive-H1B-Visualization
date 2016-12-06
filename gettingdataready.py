@@ -41,8 +41,8 @@ for state in states:
     result = dummy.find_one(sort=[("count", -1)])
     enmaxtitle = result['_id']['employer_name']
     enmaxno = result['count']
-    stateindex = stateindex + 1
     finalresult = mycollection.insert({"id":stateindex,"employer_state":state,"certified":certified,"certifiedwithdrawn":certifiedwithdrawn,"withdrawn":withdrawn,"denied":denied,"max_salary":maxsalary['prevailing_wage'],"jobtitlewithmaxsalary":maxsalary['job_title'],"min_salary":minsalary['prevailing_wage'],"jobtitlewithminsalary":minsalary['job_title'],"maxcertifiedjobtitle":jtmaxtitle,"jtmaxno":jtmaxno,"maxcertifiedemployername":enmaxtitle,"enmaxno":enmaxno})
+    stateindex = stateindex + 1
     print finalresult
 
 

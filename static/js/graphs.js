@@ -88,7 +88,7 @@ function drawwordcloud1(){
             frequency_list.push({"text":id_name_map[state_id].name, "size":parseInt((((d.certified/total)*100).toFixed(0))-80)*2 });
         });
 
-    d3.layout.cloud().size([1200, 300])
+    d3.layout.cloud().size([1500, 300])
             .words(frequency_list)
             .rotate(0)
             .fontSize(function(d) { return d.size; })
@@ -100,7 +100,7 @@ function drawwordcloud1(){
     function drawCloud(words) {
         //console.log(words);
         d3.select("#wordcloud1").append("svg")
-                .attr("width", 1200)
+                .attr("width", 1500)
                 .attr("height", 300)
                 .attr("class", "wordcloud")
                 .append("g")
@@ -846,7 +846,7 @@ d3.json("/h1b/alldata", function(error, data) {
 
             g.append("text")
             .attr("x", width)
-            .attr("y", 70)
+            .attr("y", 120)
             .style("fill","#AA8939")
             .style("font-size","30px")
             .style("text-anchor", "end")
@@ -854,7 +854,7 @@ d3.json("/h1b/alldata", function(error, data) {
 
             g.append("text")
             .attr("x", width)
-            .attr("y", 90)
+            .attr("y", 150)
             .style("fill","#a0e")
             .style("font-size","15px")
             .style("text-anchor", "end")

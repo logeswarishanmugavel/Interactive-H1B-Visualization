@@ -228,6 +228,118 @@ function drawwordcloud3(){
 
 
 function drawlinechart(){
+
+  var margin = {top: 20, right: 150, bottom: 30, left: 50},
+    width = 1500 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+  var linedata = [];
+
+  var x = d3.scale.ordinal()
+        .rangeRoundBands([0, width], .1);
+
+  var y = d3.scale.linear()
+    .range([height, 0]);
+
+  var color = d3.scale.category20();
+
+  var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+  var area = d3.svg.area()
+    .x(function(d) { return x(d.State); })
+    .y0(function(d) { return y(d.y0); })
+    .y1(function(d) { return y(d.y0 + d.y); });
+
+
+  var stack = d3.layout.stack().values(function(d) { return d.values; });
+
+
+  var svg_line = d3.select("#line-chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  d3.json("/h1b/alldata", function(error, data) {
+        if (error) throw error;
+
+        data.forEach(function(d) {
+            total = d.certified + d.certifiedwithdrawn + d.withdrawn + d.denied;
+            linedata.push({"State":d.employer_state,"CERTIFIED":((d.certified/total)*100).toFixed(2), "WITHDRAWN": ((d.withdrawn/total)*100).toFixed(2), "CERTIFIEDWITHDRAWN": ((d.certifiedwithdrawn/total)*100).toFixed(2), "DENIED":((d.denied/total)*100).toFixed(2)});
+        });
+
+        console.log(linedata);
+
+        color.domain(d3.keys(linedata[0]).filter(function(key) { return key !== "State"; }));
+
+        //console.log(color);
+  
+        var layers = stack(color.domain().map(function(name) {
+          return {
+            name: name,
+            values: linedata.map(function(d) {
+              return {State: d.State, y: d[name] * 1};
+            })
+          };
+        }));
+
+        console.log(layers);
+
+        x.domain(linedata.map(function(d) { 
+        return d.State; }));
+        console.log(x);
+        y.domain([0, 100]);
+
+        svg_line.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+        svg_line.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
+
+        
+        var layer = svg_line.selectAll(".layer")
+          .data(layers)
+          .enter().append("g")
+          .attr("class", "layer");
+
+         console.log(layer);
+
+        layer.append("path")
+          .attr("class", "area")
+          .attr("d", function(d) { return area(d.values); })
+          .style("fill", function(d) { return color(d.name); });
+
+          console.log(layer);
+
+        
+        layer.append("text")
+          .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+          .attr("transform", function(d) { 
+            console.log(d);
+            return "translate(" + x(d.value.State) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
+          .attr("x", -5)
+          .attr("dy", ".35em")
+          .text(function(d) { return d.name; });
+          
+
+         
+
+
+
+  });
+}
+
+
+  /*
     //console.log("Drawing Line Chart")
     var margin = {top: 200, right: 0, bottom: 30, left: 150},
     width = 2000 - margin.left - margin.right,
@@ -364,8 +476,10 @@ function drawlinechart(){
       .style("text-anchor", "end")
       .text(function(d) { return d; });
 });
-}
 
+
+}
+*/
 
 function drawgroupedbarchart(){
 
@@ -428,10 +542,12 @@ function drawgroupedbarchart(){
 
 
         data.forEach(function(d) {
-            bardata[d.id] = ({"State":d.employer_state,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});
+            bardata.push({"State":d.employer_state,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});
         });
 
-        var Names = d3.keys(bardata[1]).filter(function(key) { return key !== "State"; });
+        console.log(bardata);
+
+        var Names = d3.keys(bardata[0]).filter(function(key) { return key !== "State"; });
         
         bardata.forEach(function(d){
              d.ages = Names.map(function(name) { return {name: name, value: +d[name]}; });
@@ -440,7 +556,7 @@ function drawgroupedbarchart(){
 
     x0.domain(bardata.map(function(d) { 
         return d.State; }));
-    x1.domain(Names).rangeRoundBands([1, x0.rangeBand()]);
+    x1.domain(Names).rangeRoundBands([0, x0.rangeBand()]);
     y.domain([0, d3.max(bardata.map(function(d) { 
         return d3.max(d.ages, function(d) { return d.value; }); })) ]);
 
@@ -506,10 +622,10 @@ function drawgroupedbarchart(){
             divTooltip.style("display", "none");
         })
         .on("click",updateTable);
-
+        console.log(svg_bar);
 
   var legend = svg_bar.selectAll(".legend")
-      .data(Names.slice().reverse())
+      .data(Names.slice())
       .enter().append("g")
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });

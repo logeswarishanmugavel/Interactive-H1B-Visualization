@@ -5,58 +5,58 @@ var id_state_map = {
     1: ""
 };
 var id_topo_map = {
-    1: null
+    0: ""
 };
 var statename = {
-    1: ""
+    0: ""
 }
 var totalapplications_by_state = {
-    1: ""
+    0: ""
 }
 var total_certified_by_state = {
-    1: ""
+    0: ""
 };
 var total_certifiedwithdrawn_by_state = {
-    1: ""
+    0: ""
 };
 var total_withdrawn_by_state = {
-    1: ""
+    0: ""
 };
 var total_denied_by_state = {
-    1: ""
+    0: ""
 };
 var max_certified_job_title_by_state = {
-    1: ""
+    0: ""
 };
 var total_certified_job_title_by_state = {
-	1: ""	
+	0: ""	
 };
 var max_certified_employer_name_by_state = {
-	1: ""	
+	0: ""	
 };
 var total_certified_employer_name_by_state = {
-	1: ""	
+	0: ""	
 };
 var job_title_with_max_salary_by_state = {
-	1: ""	
+	0: ""	
 };
 var job_title_with_min_salary_by_state = {
-	1: ""	
+	0: ""	
 };
 var max_salary_by_state = {
-	1: ""	
+	0: ""	
 };
 var min_salary_by_state = {
-	1: ""	
+	0: ""	
 };
 var id_name_map = {
-    0: null
 };
 var short_name_id_map = {
-    0: null
+};
+var full_name_id_map = {
 };
 var state_link = {
-    0: null
+    0: ""
 };
 
 drawmap();
@@ -78,12 +78,6 @@ function drawwordcloud1(){
     d3.json("/h1b/alldata", function(error, data) {
         d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
             if (error) throw error;
-            
-            for (var i = 0; i < names.length; i++) {
-                id_name_map[names[i].id] = names[i];
-                short_name_id_map[names[i].code] = names[i].id;
-            }
-        
 
         data.forEach(function(d) {
             total = d.certified + d.certifiedwithdrawn + d.withdrawn + d.denied;
@@ -91,7 +85,7 @@ function drawwordcloud1(){
             //console.log(d);
             //console.log(id_name_map);
             //console.log(names[id].name);
-            frequency_list.push({"text":id_name_map[state_id].name, "size":parseInt((((d.certified/total)*100).toFixed(0))-80)*1.5 });
+            frequency_list.push({"text":id_name_map[state_id].name, "size":parseInt((((d.certified/total)*100).toFixed(0))-80)*2 });
         });
 
     d3.layout.cloud().size([1200, 300])
@@ -141,7 +135,6 @@ function drawwordcloud2(){
         
 
         data.forEach(function(d) {
-            //console.log(d);
             frequency_list.push({"text":d.maxcertifiedjobtitle, "size":d.jtmaxno/200});
         });
 
@@ -229,9 +222,9 @@ function drawwordcloud3(){
 
 function drawlinechart(){
 
-  var margin = {top: 20, right: 150, bottom: 200, left: 50},
+  var margin = {top: 200, right: 150, bottom: 200, left: 50},
     width = 2000 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    height = 800 - margin.top - margin.bottom;
 
   var linedata = [];
 
@@ -268,15 +261,18 @@ function drawlinechart(){
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+  svg_line.append("text")
+      .attr("x", width/4)
+      .attr("y", -160)
+      .style("fill","#AA8939")
+      .style("font-size","25px")
+      .style("text-anchor", "start")
+      .text("Application Status Analysis per State");
+
   d3.json("/h1b/alldata", function(error, data) {
         
       d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
             if (error) throw error;
-            
-            for (var i = 0; i < names.length; i++) {
-                id_name_map[names[i].id-1] = names[i];
-                short_name_id_map[names[i].code] = names[i].id-1;
-            }
 
 console.log()
         data.forEach(function(d) {
@@ -342,7 +338,14 @@ console.log()
 
         svg_line.append("g")
           .attr("class", "y axis")
-          .call(yAxis);
+          .call(yAxis).append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -45)
+      .attr("x",-height/2)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Percentage");
+
          
         var mouseG = svg_line.append("g")
   .attr("class", "mouse-over-effects");
@@ -556,7 +559,7 @@ mouseG.append('svg:rect')
 
 function drawgroupedbarchart(){
 
-    var margin = {top: 50, right: 20, bottom: 30, left: 40},
+    var margin = {top: 50, right: 20, bottom: 200, left: 70},
     width = 1500,
     height = 500;
 
@@ -611,11 +614,13 @@ function drawgroupedbarchart(){
 
 
     d3.json("/h1b/alldata", function(error, data) {
+       d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
         if (error) throw error;
 
-
         data.forEach(function(d) {
-            bardata[d.id]=({"State":d.employer_state,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});
+          if(d){
+          var state_id = short_name_id_map[d.employer_state];
+            bardata[d.id]=({"State":id_name_map[state_id].name,"Maximum Salary":d.max_salary, "Minimum Salary": d.min_salary});}
         });
 
         console.log(bardata);
@@ -636,14 +641,22 @@ function drawgroupedbarchart(){
     svg_bar.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+      .call(xAxis)
+      .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                });
 
     svg_bar.append("g")
       .attr("class", "y axis")
       .call(yAxis)
         .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("y", -60)
+      .attr("x",-height/2)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("No. of applications");
@@ -685,17 +698,13 @@ function drawgroupedbarchart(){
             var elements = document.querySelectorAll(':hover');
             l = elements.length
             l = l-1
-            var id = short_name_id_map[d.State];
             elementData = elements[l].__data__
-            divTooltip.html((id_name_map[id].name)+"<br>"+elementData.name+" : $"+elementData.value);
-        });
-
-        state
+            divTooltip.html(elementData.name+" : $"+elementData.value);
+        })
         .on("mouseout", function(d){
             divTooltip.style("display", "none");
         })
         .on("click",updateTable);
-        console.log(svg_bar);
 
   var legend = svg_bar.selectAll(".legend")
       .data(Names.slice())
@@ -716,15 +725,18 @@ function drawgroupedbarchart(){
       .style("text-anchor", "end")
       .text(function(d) { return d; });
  
-});
+}); 
 
     function updateTable(d){
-        var id = short_name_id_map[d.State];
+
+        var id = full_name_id_map[d.State];
+
         $('#jobtitlewithmaxsalary-value').html(job_title_with_max_salary_by_state[id]);
         $('#max_salary-value').html(max_salary_by_state[id]);
         $('#jobtitlewithminsalary-value').html(job_title_with_min_salary_by_state[id]);
         $('#min_salary-value').html(min_salary_by_state[id]);
     }
+    });
 }
 
 function drawmap(){
@@ -750,6 +762,7 @@ d3.json("/h1b/alldata", function(error, data) {
     for (var i = 0; i < names.length; i++) {
         id_name_map[names[i].id] = names[i];
         short_name_id_map[names[i].code] = names[i].id;
+        full_name_id_map[names[i].name] = names[i].id;
     }
     data.forEach(function(d) {
  

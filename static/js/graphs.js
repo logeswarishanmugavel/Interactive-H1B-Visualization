@@ -229,8 +229,8 @@ function drawwordcloud3(){
 
 function drawlinechart(){
 
-  var margin = {top: 20, right: 150, bottom: 30, left: 50},
-    width = 1500 - margin.left - margin.right,
+  var margin = {top: 20, right: 150, bottom: 200, left: 50},
+    width = 2000 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
   var linedata = [];
@@ -257,6 +257,8 @@ function drawlinechart(){
     .y1(function(d) { return y(d.y0 + d.y); });
 
 
+  var divTooltip = d3.select("body").append("div").attr("class", "toolTip");
+  
   var stack = d3.layout.stack().values(function(d) { return d.values; });
 
 
@@ -267,20 +269,29 @@ function drawlinechart(){
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   d3.json("/h1b/alldata", function(error, data) {
-        if (error) throw error;
+        
+      d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
+            if (error) throw error;
+            
+            for (var i = 0; i < names.length; i++) {
+                id_name_map[names[i].id-1] = names[i];
+                short_name_id_map[names[i].code] = names[i].id-1;
+            }
 
-
-
+console.log()
         data.forEach(function(d) {
+          if(d){
             total = d.certified + d.certifiedwithdrawn + d.withdrawn + d.denied;
-            linedata[d.id]=({"State":d.employer_state,"CERTIFIED":((d.certified/total)*100).toFixed(2), "WITHDRAWN": ((d.withdrawn/total)*100).toFixed(2), "CERTIFIEDWITHDRAWN": ((d.certifiedwithdrawn/total)*100).toFixed(2), "DENIED":((d.denied/total)*100).toFixed(2)});
+            var state_id = short_name_id_map[d.employer_state];
+            linedata.push({"State":id_name_map[state_id].name,"CERTIFIED":((d.certified/total)*100).toFixed(2), "WITHDRAWN": ((d.withdrawn/total)*100).toFixed(2), "CERTIFIEDWITHDRAWN": ((d.certifiedwithdrawn/total)*100).toFixed(2), "DENIED":((d.denied/total)*100).toFixed(2)});
+          }
         });
+        linedata.push({"State":"","CERTIFIED":"", "WITHDRAWN": "", "CERTIFIEDWITHDRAWN": "", "DENIED":""});
 
         console.log(linedata);
 
         color.domain(d3.keys(linedata[0]).filter(function(key) { return key !== "State"; }));
 
-        //console.log(color);
   
         var layers = stack(color.domain().map(function(name) {
           return {
@@ -291,11 +302,9 @@ function drawlinechart(){
           };
         }));
 
-        console.log(layers);
 
         x.domain(linedata.map(function(d) { 
         return d.State; }));
-        //console.log(x.domain());
         y.domain([0, 100]);
 
         
@@ -304,7 +313,6 @@ function drawlinechart(){
           .enter().append("g")
           .attr("class", "layer");
 
-         console.log(layer);
 
         layer.append("path")
           .attr("class", "area")
@@ -313,7 +321,7 @@ function drawlinechart(){
 
         
         layer.append("text")
-          .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+          .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 2]}; })
           .attr("transform", function(d) {
             return "translate(" + x(d.value.State) + "," + y(d.value.y0 + d.value.y / 2) + ")"; })
           .attr("x", -5)
@@ -323,14 +331,82 @@ function drawlinechart(){
            svg_line.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
+          .call(xAxis)
+          .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                });
 
         svg_line.append("g")
           .attr("class", "y axis")
           .call(yAxis);
          
+        var mouseG = svg_line.append("g")
+  .attr("class", "mouse-over-effects");
 
+mouseG.append("path")
+  .attr("class", "mouse-line")
+  .style("stroke", "black")
+  .style("stroke-width", "1px")
+  .style("opacity", "0");
 
+var lines = document.getElementsByClassName('line');
+
+var mousePerLine = mouseG.selectAll('.mouse-per-line')
+  .data(linedata)
+  .enter()
+  .append("g")
+  .attr("class", "mouse-per-line");
+
+mousePerLine.append("circle")
+  .attr("r", 7)
+  .style("stroke", function(d) {
+    return color(d.name);
+  })
+  .style("fill", "none")
+  .style("stroke-width", "1px")
+  .style("opacity", "0");
+
+mousePerLine.append("text")
+  .attr("transform", "translate(10,3)");
+
+mouseG.append('svg:rect')
+  .attr('width', width)
+  .attr('height', height)
+  .attr('fill', 'none')
+  .attr('pointer-events', 'all')
+  .on('mouseout', function() { 
+    d3.select(".mouse-line")
+      .style("opacity", "0");
+    d3.selectAll(".mouse-per-line circle")
+      .style("opacity", "0");
+    d3.selectAll(".mouse-per-line text")
+      .style("opacity", "0");
+  })
+  .on('mouseover', function() { 
+    d3.select(".mouse-line")
+      .style("opacity", "1");
+    d3.selectAll(".mouse-per-line circle")
+      .style("opacity", "1");
+    d3.selectAll(".mouse-per-line text")
+      .style("opacity", "1");
+  })
+  .on('mousemove', function() { 
+    var mouse = d3.mouse(this);
+
+    d3.select(".mouse-line")
+      .attr("d", function() {
+        var d = "M" + mouse[0] + "," + height;
+        d += " " + mouse[0] + "," + 0;
+        return d;
+      });
+
+});
+      
+  });
 
   });
 }

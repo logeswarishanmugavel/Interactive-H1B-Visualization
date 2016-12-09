@@ -59,22 +59,25 @@ var state_link = {
     0: ""
 };
 
-drawmap();
 drawgroupedbarchart();
+drawmap();
+
 drawlinechart();
 drawwordcloud1();
 drawwordcloud2();
 drawwordcloud3();
 
 function drawwordcloud1(){
-
+  //US States word cloud
   $('#wordcloud1title').html("US States & their total certified applications");
   var frequency_list = [];
 
+  //determine the color of the word.
   var color = d3.scale.linear()
             .domain([0,1,2,3,4,5,6,10,15,20])
             .range(["#544F4F", "#604F4F", "#664F4F", "#724F4F", "#784F4F", "#844F4F", "#904F4F", "#964F4F", "#A24F4F", "#B24F4F"]);
 
+  //getting data
     d3.json("/h1b/alldata", function(error, data) {
         d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
             if (error) throw error;
@@ -82,12 +85,10 @@ function drawwordcloud1(){
         data.forEach(function(d) {
             total = d.certified + d.certifiedwithdrawn + d.withdrawn + d.denied;
             var state_id = short_name_id_map[d.employer_state];
-            //console.log(d);
-            //console.log(id_name_map);
-            //console.log(names[id].name);
             frequency_list.push({"text":id_name_map[state_id].name, "size":parseInt((((d.certified/total)*100).toFixed(0))-80)*2 });
         });
 
+    //setting up layout
     d3.layout.cloud().size([1500, 300])
             .words(frequency_list)
             .rotate(0)
@@ -98,7 +99,7 @@ function drawwordcloud1(){
 
 
     function drawCloud(words) {
-        //console.log(words);
+        //draw the wordcloud
         d3.select("#wordcloud1").append("svg")
                 .attr("width", 1500)
                 .attr("height", 300)
@@ -122,7 +123,7 @@ function drawwordcloud1(){
 }
 
 function drawwordcloud2(){
-
+//job titles word cloud
   $('#wordcloud2title').html("Job titles & their total certified applications");
   var frequency_list = [];
 
@@ -170,7 +171,7 @@ function drawwordcloud2(){
 }
 
 function drawwordcloud3(){
-
+//employer names word cloud
   $('#wordcloud3title').html("Employer names & their total certified applications");
   var frequency_list = [];
 
@@ -197,7 +198,7 @@ function drawwordcloud3(){
     
 
     function drawCloud(words) {
-        //console.log(words);
+        
         d3.select("#wordcloud3").append("svg")
                 .attr("width", 1200)
                 .attr("height", 300)
@@ -221,7 +222,7 @@ function drawwordcloud3(){
 
 
 function drawlinechart(){
-
+//stacked area chart
   var margin = {top: 200, right: 150, bottom: 200, left: 50},
     width = 2000 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
@@ -235,7 +236,7 @@ function drawlinechart(){
     .range([height, 0]);
 
   var color = d3.scale.category20();
-
+//assigns x and y axes.
   var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom");
@@ -249,7 +250,7 @@ function drawlinechart(){
     .y0(function(d) { return y(d.y0); })
     .y1(function(d) { return y(d.y0 + d.y); });
 
-
+//tooltip on hover
   var divTooltip = d3.select("body").append("div").attr("class", "toolTip");
   
   var stack = d3.layout.stack().values(function(d) { return d.values; });
@@ -260,7 +261,7 @@ function drawlinechart(){
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+//title text
   svg_line.append("text")
       .attr("x", width/4)
       .attr("y", -160)
@@ -273,8 +274,7 @@ function drawlinechart(){
         
       d3.tsv("./static/data/us-state-names.tsv", function(error, names) {
             if (error) throw error;
-
-console.log()
+//getting the data
         data.forEach(function(d) {
           if(d){
             total = d.certified + d.certifiedwithdrawn + d.withdrawn + d.denied;
@@ -284,11 +284,11 @@ console.log()
         });
         linedata.push({"State":"","CERTIFIED":"", "WITHDRAWN": "", "CERTIFIEDWITHDRAWN": "", "DENIED":""});
 
-        console.log(linedata);
+
 
         color.domain(d3.keys(linedata[0]).filter(function(key) { return key !== "State"; }));
 
-  
+  //setting up layers of the area
         var layers = stack(color.domain().map(function(name) {
           return {
             name: name,
@@ -309,13 +309,13 @@ console.log()
           .enter().append("g")
           .attr("class", "layer");
 
-
+//the lines
         layer.append("path")
           .attr("class", "area")
           .attr("d", function(d) { return area(d.values); })
           .style("fill", function(d) { return color(d.name); });
 
-        
+       //the legend names at the end of the chart 
         layer.append("text")
           .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 2]}; })
           .attr("transform", function(d) {
@@ -346,11 +346,11 @@ console.log()
       .style("text-anchor", "end")
       .text("Percentage");
 
-         
-        var mouseG = svg_line.append("g")
+     //vertical line    
+        var mouseline = svg_line.append("g")
   .attr("class", "mouse-over-effects");
 
-mouseG.append("path")
+mouseline.append("path")
   .attr("class", "mouse-line")
   .style("stroke", "black")
   .style("stroke-width", "1px")
@@ -358,7 +358,7 @@ mouseG.append("path")
 
 var lines = document.getElementsByClassName('line');
 
-var mousePerLine = mouseG.selectAll('.mouse-per-line')
+var mousePerLine = mouseline.selectAll('.mouse-per-line')
   .data(linedata)
   .enter()
   .append("g")
@@ -376,7 +376,7 @@ mousePerLine.append("circle")
 mousePerLine.append("text")
   .attr("transform", "translate(10,3)");
 
-mouseG.append('svg:rect')
+mouseline.append('svg:rect')
   .attr('width', width)
   .attr('height', height)
   .attr('fill', 'none')
@@ -414,6 +414,7 @@ mouseG.append('svg:rect')
   });
 }
 
+//scatter plot
 
   /*
     //console.log("Drawing Line Chart")
@@ -558,7 +559,7 @@ mouseG.append('svg:rect')
 */
 
 function drawgroupedbarchart(){
-
+//Overlapping bar chart
     var margin = {top: 50, right: 20, bottom: 200, left: 70},
     width = 1500,
     height = 500;
@@ -659,7 +660,7 @@ function drawgroupedbarchart(){
       .attr("x",-height/2)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("No. of applications");
+      .text("Amount in Dollars");
 
     svg_bar.append("g")
       .attr("class", "state");
@@ -740,7 +741,7 @@ function drawgroupedbarchart(){
 }
 
 function drawmap(){
-
+//US map
 var centered;
 var margin = {top: 40, right: 20, bottom: 30, left: 40};
 var width = 700;
@@ -868,6 +869,7 @@ d3.json("/h1b/alldata", function(error, data) {
 });
 
 function map_clicked(d) {
+  //On state click
     if (d) {
         $('#statenamevalue').html(short_name_id_map[d.id]);
         drawpiechart(d);
@@ -896,6 +898,8 @@ function map_clicked(d) {
 }
 
 function drawpiechart(d){
+
+  //draw pie chart
     if (total_certified_by_state[d.id]) {
     $('#pie-chart').html("");
     var data = [{"name":"CERTIFIED","value":total_certified_by_state[d.id],"percent":(total_certified_by_state[d.id]/totalapplications_by_state[d.id])*100},

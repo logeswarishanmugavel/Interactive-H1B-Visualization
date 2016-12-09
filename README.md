@@ -53,11 +53,6 @@ Once the data is ready, to start the application,
 <tr >
 <td colspan=2 style = 'text-align:center'><b> Library files</b> </td>
 </tr>
-<tr>
-<td>static/js/d3.layout.cloud.js</td>
-<td>D3 file responsible for drawing the wordcloud.</td>
-</tr>
-<tr>
 <td>static/data/us.json</td>
 <td>Contains the geographical details of US states.</td>
 </tr>

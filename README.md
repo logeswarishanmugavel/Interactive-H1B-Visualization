@@ -60,4 +60,29 @@ Once the data is ready, to start the application,
 <td>static/data/us-state-names.tsv</td>
 <td>Contains the short and full form of US state names.</td>
 </tr>
+<tr>
+<td>d3js.org/d3.v3.min.js</td>
+<td>D3 Library</td>
+</tr>
+<tr>
+<td>d3.tip.v0.6.3.js</td>
+<td>D3 Tooltip Library</td>
+</tr>
+<tr>
+<td>jquery-1.7.1.min.js</td>
+<td>JQuery</td>
+</tr>
+<tr>
+<td>topojson.v1.min.js</td>
+<td>Chloropleth Library</td>
+</tr>
+<tr>
+<td>d3.layout.cloud.js</td>
+<td>Wordcloud Library</td>
+</tr>
 </table>
+
+
+
+
+
